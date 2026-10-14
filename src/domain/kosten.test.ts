@@ -133,10 +133,61 @@ describe('berechneGesamtkosten', () => {
         expect(r.hinweise).toHaveLength(1);
     });
 
-    it('Bindung länger als der Zeitraum: Hinweis', () => {
-        const tarif = testTarif({ bindungMonate: 24 });
+    it('Bindung länger als der Zeitraum: Zeitraum wird auf die Bindung verlängert', () => {
+        // 24 × 20,00 = 480,00 + (2 Jahre × 10,00 = 20,00) = 500,00; 500,00 / 24 ≈ 20,83
+        const tarif = testTarif({ bindungMonate: 24, servicepauschaleJahrCent: 1000 });
         const r = berechneGesamtkosten(simOnly(), tarif, undefined, 12);
-        expect(r.hinweise).toHaveLength(1);
+        expect(r).toMatchObject({
+            zeitraumMonate: 24,
+            tarifCent: 48000,
+            servicepauschaleCent: 2000,
+            gesamtCent: 50000,
+            proMonatCent: 2083,
+        });
+        expect(r.hinweise).toEqual(['Zeitraum auf die Bindung von 24 Monaten verlängert.']);
+    });
+
+    it('Bindung länger als der Zeitraum: monatlicher Rabatt wird auf die Bindung gekappt', () => {
+        const tarif = testTarif({
+            bindungMonate: 24,
+            rabatte: [{ bezeichnung: 'Langer Rabatt', art: 'monatlich', betragCent: 100, dauerMonate: 36 }],
+        });
+        const r = berechneGesamtkosten(simOnly(), tarif, undefined, 12);
+        expect(r.rabattCent).toBe(2400);
+    });
+
+    it('Bindung deckt die Raten ab: nur der Bindungs-Hinweis', () => {
+        const tarif = testTarif({ bindungMonate: 24 });
+        const r = berechneGesamtkosten(geraetVertrag(5000, 2500, 24), tarif, testGeraet, 12);
+        expect(r.geraetCent).toBe(65000);
+        expect(r.hinweise).toEqual(['Zeitraum auf die Bindung von 24 Monaten verlängert.']);
+    });
+
+    it('Raten länger als die Bindung: Raten-Hinweis nennt den wirksamen Zeitraum', () => {
+        const tarif = testTarif({ bindungMonate: 24 });
+        const r = berechneGesamtkosten(geraetVertrag(0, 2500, 36), tarif, testGeraet, 12);
+        expect(r.geraetCent).toBe(90000);
+        expect(r.hinweise).toHaveLength(2);
+        expect(r.hinweise[1]).toContain('der Vergleichszeitraum ist 24 Monate');
+    });
+
+    it('Gerät im Vertrag sofort bezahlt: Einmalbetrag als Anzahlung, keine Raten', () => {
+        const r = berechneGesamtkosten(geraetVertrag(19900, 0, 0), testTarif(), testGeraet, 24);
+        expect(r.geraetCent).toBe(19900);
+        expect(r.hinweise).toEqual([]);
+    });
+
+    it('Bindung kürzer als der Zeitraum: nichts ändert sich', () => {
+        const tarif = testTarif({ bindungMonate: 24, servicepauschaleJahrCent: 1000 });
+        const r = berechneGesamtkosten(simOnly(), tarif, undefined, 36);
+        expect(r).toMatchObject({
+            zeitraumMonate: 36,
+            tarifCent: 72000,
+            servicepauschaleCent: 3000,
+            gesamtCent: 75000,
+            proMonatCent: 2083,
+        });
+        expect(r.hinweise).toEqual([]);
     });
 
     it.each([0, -1, 1.5])('ungültiger Vergleichszeitraum %s wirft einen Fehler', (zeitraum) => {

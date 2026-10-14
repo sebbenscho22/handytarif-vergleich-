@@ -40,10 +40,16 @@ export function berechneGesamtkosten(
 
     const hinweise: string[] = [];
 
-    const tarifCent = tarif.preisMonatlichCent * zeitraumMonate;
-    const rabattCent = rabattSumme([...tarif.rabatte, ...angebot.rabatte], zeitraumMonate);
+    // Die Bindung muss bezahlt werden, auch wenn der Vergleichszeitraum kürzer ist.
+    const wirksamMonate = Math.max(zeitraumMonate, tarif.bindungMonate);
+    if (wirksamMonate > zeitraumMonate) {
+        hinweise.push(`Zeitraum auf die Bindung von ${tarif.bindungMonate} Monaten verlängert.`);
+    }
+
+    const tarifCent = tarif.preisMonatlichCent * wirksamMonate;
+    const rabattCent = rabattSumme([...tarif.rabatte, ...angebot.rabatte], wirksamMonate);
     const einmaligCent = tarif.einmaligCent;
-    const servicepauschaleCent = Math.ceil(zeitraumMonate / 12) * tarif.servicepauschaleJahrCent;
+    const servicepauschaleCent = Math.ceil(wirksamMonate / 12) * tarif.servicepauschaleJahrCent;
 
     let geraetCent = 0;
     if (angebot.art !== 'simOnly') {
@@ -57,31 +63,25 @@ export function berechneGesamtkosten(
             geraetCent = geraet.preisFreiCent;
         } else {
             geraetCent = angebot.anzahlungCent + angebot.rateMonatlichCent * angebot.rateAnzahlMonate;
-            if (angebot.rateAnzahlMonate > zeitraumMonate) {
+            if (angebot.rateAnzahlMonate > wirksamMonate) {
                 hinweise.push(
-                    `Die Raten laufen ${angebot.rateAnzahlMonate} Monate, der Vergleichszeitraum ist ${zeitraumMonate} Monate. Alle Raten sind in den Gerätekosten enthalten.`,
+                    `Die Raten laufen ${angebot.rateAnzahlMonate} Monate, der Vergleichszeitraum ist ${wirksamMonate} Monate. Alle Raten sind in den Gerätekosten enthalten.`,
                 );
             }
         }
     }
 
-    if (tarif.bindungMonate > zeitraumMonate) {
-        hinweise.push(
-            `Die Bindung beträgt ${tarif.bindungMonate} Monate, der Vergleichszeitraum ist nur ${zeitraumMonate} Monate.`,
-        );
-    }
-
     const gesamtCent = tarifCent - rabattCent + einmaligCent + servicepauschaleCent + geraetCent;
 
     return {
-        zeitraumMonate,
+        zeitraumMonate: wirksamMonate,
         tarifCent,
         rabattCent,
         einmaligCent,
         servicepauschaleCent,
         geraetCent,
         gesamtCent,
-        proMonatCent: Math.round(gesamtCent / zeitraumMonate),
+        proMonatCent: Math.round(gesamtCent / wirksamMonate),
         hinweise,
     };
 }
