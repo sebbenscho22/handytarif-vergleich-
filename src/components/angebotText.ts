@@ -1,10 +1,7 @@
+import { ART_TEXT } from '../domain/spalten';
 import type { Angebot, AppDaten } from '../domain/types';
 
-export const ART_TEXT: Record<Angebot['art'], string> = {
-    simOnly: 'Nur SIM',
-    geraetFrei: 'Gerät frei gekauft',
-    geraetVertrag: 'Gerät mit Vertrag',
-};
+export { ART_TEXT };
 
 export function angebotBeschreibung(a: Angebot, daten: AppDaten): string {
     const tarif = daten.tarife.find((t) => t.id === a.tarifId);
