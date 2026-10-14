@@ -1,11 +1,15 @@
 // Umwandlung zwischen Formular-Eingaben (alles Text) und dem Datenmodell, inkl. Prüfung.
 import type { Angebot, Geraet, Netztechnik, Rabatt, Tarif } from './types';
+import { type Fehler, fehlerAlsText, pruefeAngebot, pruefeGeraet, pruefeTarif } from './validierung';
 import { centAlsEingabe, parseEuro, parseGanzzahl, parseKontingent } from './zahlen';
 
 export type Ergebnis<T> = { ok: true; wert: T } | { ok: false; fehler: string[] };
 
-function ergebnis<T>(wert: T, fehler: string[]): Ergebnis<T> {
-    return fehler.length > 0 ? { ok: false, fehler } : { ok: true, wert };
+// Erst die verständlichen Formularfehler. Gibt es keine, prüft `modell` das fertige Objekt
+// mit denselben Regeln wie der Import. So kann nichts gespeichert werden, was später beim Laden scheitert.
+function ergebnis<T>(wert: T, fehler: string[], modell: (wert: T) => Fehler[]): Ergebnis<T> {
+    const alle = fehler.length > 0 ? fehler : fehlerAlsText(modell(wert));
+    return alle.length > 0 ? { ok: false, fehler: alle } : { ok: true, wert };
 }
 
 // Entfernt Felder mit undefined, damit leere optionale Angaben nicht im Objekt stehen.
@@ -84,7 +88,8 @@ export function rabatteAuswerten(eingaben: RabattEingabe[]): Ergebnis<Rabatt[]> 
         }
         rabatte.push(rabatt);
     });
-    return ergebnis(rabatte, fehler);
+    // Rabatte werden mit dem Tarif bzw. Angebot geprüft, dem sie gehören.
+    return ergebnis(rabatte, fehler, () => []);
 }
 
 // ---------- Tarif ----------
@@ -156,7 +161,7 @@ export function tarifAuswerten(e: TarifEingabe, id: string, alt?: Tarif): Ergebn
         preisStand: leerZuUndefined(e.preisStand),
         notiz: leerZuUndefined(e.notiz),
     });
-    return ergebnis(tarif, fehler);
+    return ergebnis(tarif, fehler, pruefeTarif);
 }
 
 // ---------- Gerät ----------
@@ -187,7 +192,7 @@ export function geraetAuswerten(e: GeraetEingabe, id: string): Ergebnis<Geraet> 
         preisStand: leerZuUndefined(e.preisStand),
         notiz: leerZuUndefined(e.notiz),
     });
-    return ergebnis(geraet, fehler);
+    return ergebnis(geraet, fehler, pruefeGeraet);
 }
 
 // ---------- Angebot ----------
@@ -237,14 +242,19 @@ export function angebotAuswerten(e: AngebotEingabe, id: string): Ergebnis<Angebo
     } else if (e.art === 'geraetFrei') {
         angebot = { ...basis, art: 'geraetFrei', geraetId: e.geraetId };
     } else {
+        const rateMonatlichCent = euroOderNull(e.rateMonatlich, 'Monatsrate', fehler);
+        const rateAnzahlMonate = monateOderNull(e.rateAnzahlMonate, 'Anzahl Raten', fehler);
+        if (rateMonatlichCent > 0 !== rateAnzahlMonate > 0) {
+            fehler.push('Monatsrate und Anzahl Raten: entweder beide ausfüllen oder beide leer lassen.');
+        }
         angebot = {
             ...basis,
             art: 'geraetVertrag',
             geraetId: e.geraetId,
             anzahlungCent: euroOderNull(e.anzahlung, 'Anzahlung', fehler),
-            rateMonatlichCent: euroOderNull(e.rateMonatlich, 'Monatsrate', fehler),
-            rateAnzahlMonate: monateOderNull(e.rateAnzahlMonate, 'Anzahl Raten', fehler),
+            rateMonatlichCent,
+            rateAnzahlMonate,
         };
     }
-    return ergebnis(ohneLeere(angebot), fehler);
+    return ergebnis(ohneLeere(angebot), fehler, pruefeAngebot);
 }

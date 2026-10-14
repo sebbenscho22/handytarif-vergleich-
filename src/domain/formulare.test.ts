@@ -122,6 +122,12 @@ describe('geraetAuswerten', () => {
             fehler: ['Modell fehlt.', 'Preis ohne Vertrag fehlt.'],
         });
     });
+    it('prüft zusätzlich mit den Modellregeln, z. B. eine leere ID', () => {
+        expect(geraetAuswerten({ ...geraetEingabeAus(), modell: 'TESTGERÄT', preisFrei: '10' }, '')).toEqual({
+            ok: false,
+            fehler: ['id: darf nicht leer sein'],
+        });
+    });
 });
 
 describe('angebotAuswerten', () => {
@@ -157,6 +163,26 @@ describe('angebotAuswerten', () => {
                 rateAnzahlMonate: 24,
             },
         });
+    });
+    it.each([
+        ['Rate ohne Anzahl', '15', ''],
+        ['Anzahl ohne Rate', '', '24'],
+    ])('Gerät mit Vertrag: %s ist ein Fehler', (_, rateMonatlich, rateAnzahlMonate) => {
+        const r = angebotAuswerten(
+            { ...angebotEingabeAus(), art: 'geraetVertrag', tarifId: 't1', geraetId: 'g1', rateMonatlich, rateAnzahlMonate },
+            'a1',
+        );
+        expect(r).toEqual({
+            ok: false,
+            fehler: ['Monatsrate und Anzahl Raten: entweder beide ausfüllen oder beide leer lassen.'],
+        });
+    });
+    it('Gerät mit Vertrag: nur Einmalbetrag ohne Raten ist gültig', () => {
+        const r = angebotAuswerten(
+            { ...angebotEingabeAus(), art: 'geraetVertrag', tarifId: 't1', geraetId: 'g1', anzahlung: '199' },
+            'a1',
+        );
+        expect(r.ok && r.wert).toMatchObject({ anzahlungCent: 19900, rateMonatlichCent: 0, rateAnzahlMonate: 0 });
     });
     it('meldet fehlenden Tarif und fehlendes Gerät', () => {
         expect(angebotAuswerten({ ...angebotEingabeAus(), art: 'geraetFrei' }, 'a1')).toEqual({
