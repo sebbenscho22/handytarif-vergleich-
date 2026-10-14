@@ -28,3 +28,18 @@ Deutsch, direkt, ohne Floskeln, kein Lob. Schwache Entscheidungen klar benennen 
 - Führe Tests und npm run build vor jedem Commit aus und committe nur, wenn beides fehlerfrei läuft.
 - Mergen in master, pushen und Branches löschen mache ich selbst. Tu das nur auf ausdrückliche Anweisung.
 - Nutze nie git push --force oder git reset --hard ohne meine ausdrückliche Zustimmung.
+
+## Branches und Testen
+- Verwende immer aussagekräftige Branch-Namen im Format feature/<kurze-beschreibung> oder fix/<kurze-beschreibung>, z. B. feature/gesamtkosten-berechnung. Keine Namen wie "test", "neu" oder "branch2".
+- Prüfe vor jeder Änderung mit git branch, dass wir auf dem Feature-Branch sind und nicht auf master.
+- Ports: 5173 für master, 5174 und höher für Feature-Branches.
+- Starte den Dev-Server immer mit festem Port und --strictPort, z. B. npm run dev -- --port 5174 --strictPort.
+- Ist der Port belegt und der Start bricht ab, brich die Aufgabe nicht ab und frag nicht nach. Probiere den nächsten Port (+1, +2, ...), wieder mit --strictPort, bis einer frei ist. Sag mir danach klar: "Info: Port 5174 war belegt, ich habe 5176 genommen."
+- Lies die tatsächliche Adresse aus der Ausgabe des Servers und nenne genau diese. Rate den Port nie.
+- Beende jede Aufgabe mit einem kurzen Block "Zum Testen":
+  - Branch-Name
+  - Ordner (voller Pfad, auch wenn es ein Worktree ist)
+  - Der verwendete Startbefehl mit Port
+  - Die Adresse, unter der ich testen kann, z. B. http://localhost:5174/
+  - Was ich konkret testen soll (2 bis 4 Punkte)
+- Zeige im Entwicklungsmodus unten rechts ein kleines Badge mit dem aktuellen Branch-Namen an (nicht im Produktions-Build).
