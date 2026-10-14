@@ -28,6 +28,12 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        # Settings → Secrets and variables → Actions → Variables. Beide Werte sind öffentlich
+        # (stehen später ohnehin im Browser-Code), darum Variablen statt Secrets.
+        # Fehlen sie, wird die App ohne Cloud gebaut.
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

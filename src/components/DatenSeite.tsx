@@ -1,10 +1,12 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { alsJson, ausJson, backupDateiname } from '../domain/backup';
 import type { AppAktionen } from '../hooks/useAppDaten';
+import type { CloudAktionen } from '../hooks/useCloud';
+import { CloudKachel } from './CloudBereich';
 
 const MAX_FEHLER = 10;
 
-export function DatenSeite({ app }: { app: AppAktionen }) {
+export function DatenSeite({ app, cloud }: { app: AppAktionen; cloud: CloudAktionen }) {
     const { daten } = app;
     const dateiFeld = useRef<HTMLInputElement>(null);
     const [meldung, setMeldung] = useState<{ art: 'gut' | 'fehler'; text: string; details?: string[] }>();
@@ -53,7 +55,9 @@ export function DatenSeite({ app }: { app: AppAktionen }) {
                 <div>
                     <h2>Daten &amp; Backup</h2>
                     <p className="unterzeile">
-                        Deine Daten liegen nur in diesem Browser auf diesem Gerät. Sichere sie regelmäßig.
+                        {cloud.status
+                            ? 'Deine Daten liegen in diesem Browser und werden mit der Cloud abgeglichen.'
+                            : 'Deine Daten liegen nur in diesem Browser auf diesem Gerät. Sichere sie regelmäßig.'}
                     </p>
                 </div>
             </div>
@@ -80,6 +84,7 @@ export function DatenSeite({ app }: { app: AppAktionen }) {
                         onChange={(ev) => void importieren(ev)}
                     />
                 </div>
+                <CloudKachel cloud={cloud} />
             </div>
 
             {meldung && (

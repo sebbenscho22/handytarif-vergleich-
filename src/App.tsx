@@ -4,7 +4,9 @@ import { DatenSeite } from './components/DatenSeite';
 import { GeraeteSeite } from './components/GeraeteSeite';
 import { TarifeSeite } from './components/TarifeSeite';
 import { VergleichSeite } from './components/VergleichSeite';
+import { CloudHinweis } from './components/CloudBereich';
 import { useAppDaten } from './hooks/useAppDaten';
+import { useCloud } from './hooks/useCloud';
 
 const SEITEN = {
     vergleich: 'Vergleich',
@@ -18,6 +20,7 @@ type Seite = keyof typeof SEITEN;
 
 export default function App() {
     const app = useAppDaten();
+    const cloud = useCloud(app.daten, app.ersetzen);
     const [seite, setSeite] = useState<Seite>('vergleich');
 
     const anzahl: Record<Seite, number | undefined> = {
@@ -56,12 +59,13 @@ export default function App() {
             </header>
             {app.ladeWarnung && <p className="hinweisbox warnbox">{app.ladeWarnung}</p>}
             {app.speicherFehler && <p className="hinweisbox fehlerbox">{app.speicherFehler}</p>}
+            <CloudHinweis cloud={cloud} />
             <main>
                 {seite === 'vergleich' && <VergleichSeite app={app} />}
                 {seite === 'angebote' && <AngeboteSeite app={app} />}
                 {seite === 'tarife' && <TarifeSeite app={app} />}
                 {seite === 'geraete' && <GeraeteSeite app={app} />}
-                {seite === 'daten' && <DatenSeite app={app} />}
+                {seite === 'daten' && <DatenSeite app={app} cloud={cloud} />}
             </main>
         </>
     );
