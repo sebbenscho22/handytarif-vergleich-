@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Lokale Claude-Code-Daten (z. B. Worktrees)
+.claude/
