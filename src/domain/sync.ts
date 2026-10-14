@@ -2,7 +2,7 @@
 import type { AppDaten } from './types';
 
 export interface SyncStand {
-    // Zeitstempel des Cloud-Stands beim letzten erfolgreichen Abgleich, null = noch nie abgeglichen.
+    // Revision des Cloud-Stands beim letzten erfolgreichen Abgleich, null = noch nie abgeglichen.
     basis: string | null;
     // true, wenn lokal seit dem letzten Abgleich etwas geändert wurde.
     lokalGeaendert: boolean;
@@ -20,10 +20,10 @@ export function startStand(daten: AppDaten): SyncStand {
     return { basis: null, lokalGeaendert: !istLeer(daten) };
 }
 
-// cloudGeaendertAm: Zeitstempel der Cloud-Zeile, null = in der Cloud liegt noch nichts.
-export function syncAktion(stand: SyncStand, cloudGeaendertAm: string | null): SyncAktion {
-    if (cloudGeaendertAm === null) return 'hochladen';
-    if (cloudGeaendertAm === stand.basis) return stand.lokalGeaendert ? 'hochladen' : 'nichts';
+// cloudRevision: Revision des Cloud-Dokuments, null = in der Cloud liegt noch nichts.
+export function syncAktion(stand: SyncStand, cloudRevision: string | null): SyncAktion {
+    if (cloudRevision === null) return 'hochladen';
+    if (cloudRevision === stand.basis) return stand.lokalGeaendert ? 'hochladen' : 'nichts';
     // Die Cloud wurde von einem anderen Gerät geändert.
     return stand.lokalGeaendert ? 'konflikt' : 'herunterladen';
 }

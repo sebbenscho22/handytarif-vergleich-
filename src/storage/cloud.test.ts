@@ -1,25 +1,34 @@
 // ACHTUNG: Alle Zahlen und Namen in dieser Datei sind TESTWERTE.
 import { describe, expect, it } from 'vitest';
-import { leereDaten } from '../domain/backup';
-import { zeileAuswerten } from './cloud';
+import { alsJson, leereDaten } from '../domain/backup';
+import { dokumentAuswerten } from './cloud';
 
-const T1 = '2026-01-01T10:00:00.000001+00:00';
+const ZEIT = '2026-01-01T10:00:00.000Z';
+const zeitstempel = { toDate: () => new Date(ZEIT) };
 
-describe('zeileAuswerten', () => {
-    it('keine Zeile → null', () => {
-        expect(zeileAuswerten(null)).toEqual({ ok: true, wert: null });
+describe('dokumentAuswerten', () => {
+    it('kein Dokument → null', () => {
+        expect(dokumentAuswerten(undefined)).toEqual({ ok: true, wert: null });
     });
 
-    it('gültige Zeile → Daten mit Zeitstempel', () => {
-        expect(zeileAuswerten({ inhalt: leereDaten(), geaendert_am: T1 })).toEqual({
+    it('gültiges Dokument → Daten mit Revision und Zeit', () => {
+        expect(dokumentAuswerten({ inhalt: alsJson(leereDaten()), revision: 'R1', geaendertAm: zeitstempel })).toEqual({
             ok: true,
-            wert: { daten: leereDaten(), geaendertAm: T1 },
+            wert: { daten: leereDaten(), revision: 'R1', geaendertAm: ZEIT },
         });
     });
 
-    it('fehlender Zeitstempel oder ungültiger Inhalt → Fehler', () => {
-        expect(zeileAuswerten({ inhalt: leereDaten() }).ok).toBe(false);
-        expect(zeileAuswerten({ inhalt: { schemaVersion: 99 }, geaendert_am: T1 }).ok).toBe(false);
-        expect(zeileAuswerten('x').ok).toBe(false);
+    it('fehlende oder ungültige Zeit → geaendertAm null, Daten trotzdem gültig', () => {
+        const r = dokumentAuswerten({ inhalt: alsJson(leereDaten()), revision: 'R1', geaendertAm: 'gestern' });
+        expect(r).toEqual({ ok: true, wert: { daten: leereDaten(), revision: 'R1', geaendertAm: null } });
+    });
+
+    it('fehlende Revision, fehlender oder ungültiger Inhalt → Fehler', () => {
+        expect(dokumentAuswerten({ inhalt: alsJson(leereDaten()) }).ok).toBe(false);
+        expect(dokumentAuswerten({ revision: 'R1' }).ok).toBe(false);
+        expect(dokumentAuswerten({ inhalt: '{"schemaVersion":99}', revision: 'R1' }).ok).toBe(false);
+        expect(dokumentAuswerten({ inhalt: '{kaputt', revision: 'R1' }).ok).toBe(false);
+        expect(dokumentAuswerten(null).ok).toBe(false);
+        expect(dokumentAuswerten('x').ok).toBe(false);
     });
 });

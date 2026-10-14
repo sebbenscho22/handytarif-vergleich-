@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import type { CloudAktionen } from '../hooks/useCloud';
 
 const STATUS_TEXT = {
@@ -10,24 +10,18 @@ const STATUS_TEXT = {
 
 // Kachel auf der Daten-Seite: an- und abmelden, Status anzeigen.
 export function CloudKachel({ cloud }: { cloud: CloudAktionen }) {
-    const [email, setEmail] = useState('');
-    const [meldung, setMeldung] = useState<{ art: 'gut' | 'fehler'; text: string }>();
+    const [fehler, setFehler] = useState<string>();
 
-    async function anmelden(ev: FormEvent) {
-        ev.preventDefault();
-        const fehler = await cloud.anmelden(email.trim());
-        setMeldung(
-            fehler
-                ? { art: 'fehler', text: `Anmelden fehlgeschlagen: ${fehler}` }
-                : { art: 'gut', text: `Login-Link an ${email.trim()} gesendet. Öffne ihn in diesem Browser.` },
-        );
+    async function anmelden() {
+        const f = await cloud.anmelden();
+        setFehler(f && `Anmelden fehlgeschlagen: ${f}`);
     }
 
     if (!cloud.verfuegbar) return null;
 
     return (
         <div className="kachel">
-            <h3>Cloud (Supabase)</h3>
+            <h3>Cloud (Firebase)</h3>
             {cloud.status ? (
                 <>
                     <p className="unterzeile">
@@ -36,26 +30,16 @@ export function CloudKachel({ cloud }: { cloud: CloudAktionen }) {
                     <button onClick={() => void cloud.abmelden()}>Abmelden</button>
                 </>
             ) : (
-                <form onSubmit={(ev) => void anmelden(ev)}>
-                    <p className="unterzeile">
-                        Mit E-Mail anmelden, um die Daten auf allen Geräten abzugleichen. Du bekommst einen Login-Link.
-                    </p>
-                    <input
-                        type="email"
-                        required
-                        placeholder="E-Mail-Adresse"
-                        autoComplete="email"
-                        value={email}
-                        onChange={(ev) => setEmail(ev.target.value)}
-                    />
-                    <button className="primaer" type="submit">
-                        Login-Link senden
+                <>
+                    <p className="unterzeile">Mit Google anmelden, um die Daten auf allen Geräten abzugleichen.</p>
+                    <button className="primaer" onClick={() => void anmelden()}>
+                        Mit Google anmelden
                     </button>
-                </form>
+                </>
             )}
-            {meldung && !cloud.status && (
-                <p className={`hinweisbox ${meldung.art === 'gut' ? 'gutbox' : 'fehlerbox'}`} role="status">
-                    {meldung.text}
+            {fehler && !cloud.status && (
+                <p className="hinweisbox fehlerbox" role="status">
+                    {fehler}
                 </p>
             )}
         </div>
@@ -69,11 +53,11 @@ export function CloudHinweis({ cloud }: { cloud: CloudAktionen }) {
     if (s?.art !== 'konflikt') return null;
 
     const c = s.cloud;
-    const geaendert = new Date(c.geaendertAm).toLocaleString('de-AT');
+    const geaendert = c.geaendertAm ? ` am ${new Date(c.geaendertAm).toLocaleString('de-AT')}` : '';
     return (
         <div className="hinweisbox warnbox" role="alert">
             <p>
-                Die Daten in der Cloud wurden am {geaendert} auf einem anderen Gerät geändert, und hier gibt es ebenfalls
+                Die Daten in der Cloud wurden{geaendert} auf einem anderen Gerät geändert, und hier gibt es ebenfalls
                 ungespeicherte Änderungen. Welcher Stand soll gelten? Der andere wird überschrieben. Tipp: vorher unter
                 „Daten“ ein Backup herunterladen.
             </p>

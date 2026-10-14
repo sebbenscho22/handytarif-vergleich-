@@ -1,8 +1,8 @@
-import type { Session, SupabaseClient } from '@supabase/supabase-js';
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth';
 import { useEffect, useState } from 'react';
 import { startStand, syncAktion, type SyncStand } from '../domain/sync';
 import type { AppDaten } from '../domain/types';
-import { cloudClient, cloudLaden, cloudSpeichern, type CloudStand } from '../storage/cloud';
+import { cloudClient, cloudLaden, cloudSpeichern, type CloudClient, type CloudStand } from '../storage/cloud';
 import { browserSpeicher, syncStandLaden, syncStandSpeichern } from '../storage/speicher';
 
 export type CloudStatus =
@@ -17,7 +17,7 @@ const HOCHLADEN_NACH_MS = 1000;
 const client = cloudClient();
 
 // Steuert den Abgleich. Alle Cloud-Zugriffe laufen nacheinander, damit sich Speichervorgänge nicht überholen.
-function erstelleAbgleich(client: SupabaseClient, startDaten: AppDaten, meldeStatus: (s: CloudStatus) => void) {
+function erstelleAbgleich(client: CloudClient, startDaten: AppDaten, meldeStatus: (s: CloudStatus) => void) {
     let daten = startDaten;
     let ersetzen: (daten: AppDaten) => void = () => {};
     let stand: SyncStand = syncStandLaden(browserSpeicher()) ?? startStand(startDaten);
@@ -43,22 +43,22 @@ function erstelleAbgleich(client: SupabaseClient, startDaten: AppDaten, meldeSta
         // Vorab eintragen, damit datenGeaendert die Cloud-Daten nicht als lokale Änderung zählt.
         daten = cloud.daten;
         ersetzen(cloud.daten);
-        setStand({ basis: cloud.geaendertAm, lokalGeaendert: false });
+        setStand({ basis: cloud.revision, lokalGeaendert: false });
         meldeStatus({ art: 'synchron' });
     }
 
     async function abgleichen(id: string): Promise<void> {
         meldeStatus({ art: 'laeuft' });
-        const r = await cloudLaden(client);
+        const r = await cloudLaden(client, id);
         if (!r.ok) return meldeStatus({ art: 'fehler', text: r.fehler.join(' ') });
         const cloud = r.wert;
-        switch (syncAktion(stand, cloud?.geaendertAm ?? null)) {
+        switch (syncAktion(stand, cloud?.revision ?? null)) {
             case 'nichts':
                 return meldeStatus({ art: 'synchron' });
             case 'herunterladen':
                 return uebernehmen(cloud!);
             case 'hochladen':
-                return hochladen(id, cloud?.geaendertAm ?? null);
+                return hochladen(id, cloud?.revision ?? null);
             case 'konflikt':
                 return meldeStatus({ art: 'konflikt', cloud: cloud! });
         }
@@ -70,7 +70,7 @@ function erstelleAbgleich(client: SupabaseClient, startDaten: AppDaten, meldeSta
         const r = await cloudSpeichern(client, id, gesendet, erwartet);
         if (r.ok) {
             // Wurde während des Hochladens weiter geändert, ist schon der nächste Upload geplant.
-            setStand({ basis: r.geaendertAm, lokalGeaendert: daten !== gesendet });
+            setStand({ basis: r.revision, lokalGeaendert: daten !== gesendet });
             return meldeStatus({ art: 'synchron' });
         }
         // Ein anderes Gerät war schneller: neu abgleichen, das führt zu Herunterladen oder Konflikt.
@@ -103,15 +103,15 @@ function erstelleAbgleich(client: SupabaseClient, startDaten: AppDaten, meldeSta
             einreihen(async () => uebernehmen(cloud));
         },
         lokalHochladen(cloud: CloudStand) {
-            einreihen((id) => hochladen(id, cloud.geaendertAm));
+            einreihen((id) => hochladen(id, cloud.revision));
         },
     };
 }
 
-// Gleicht die Daten mit Supabase ab, sobald jemand angemeldet ist.
+// Gleicht die Daten mit Firestore ab, sobald jemand angemeldet ist.
 // Ohne Konfiguration (keine Umgebungsvariablen) ist verfuegbar false und es passiert nichts.
 export function useCloud(daten: AppDaten, ersetzen: (daten: AppDaten) => void) {
-    const [session, setSession] = useState<Session | null>(null);
+    const [nutzer, setNutzer] = useState<User | null>(null);
     const [status, setStatus] = useState<CloudStatus>({ art: 'laeuft' });
     const [abgleich] = useState(() => client && erstelleAbgleich(client, daten, setStatus));
 
@@ -125,12 +125,11 @@ export function useCloud(daten: AppDaten, ersetzen: (daten: AppDaten) => void) {
 
     useEffect(() => {
         if (!client) return;
-        // Liefert sofort die gespeicherte Sitzung und danach jede An- und Abmeldung.
-        const { data } = client.auth.onAuthStateChange((_ereignis, s) => setSession(s));
-        return () => data.subscription.unsubscribe();
+        // Liefert sofort die gespeicherte Anmeldung und danach jede An- und Abmeldung.
+        return onAuthStateChanged(client.auth, setNutzer);
     }, []);
 
-    const userId = session?.user.id ?? null;
+    const userId = nutzer?.uid ?? null;
 
     useEffect(() => {
         if (!abgleich) return;
@@ -150,20 +149,21 @@ export function useCloud(daten: AppDaten, ersetzen: (daten: AppDaten) => void) {
 
     return {
         verfuegbar: client !== null,
-        email: session?.user.email,
+        email: nutzer?.email ?? undefined,
         // null = nicht angemeldet
         status: userId ? status : null,
-        // Liefert eine Fehlermeldung oder undefined bei Erfolg.
-        async anmelden(email: string): Promise<string | undefined> {
+        // Öffnet das Google-Anmeldefenster. Liefert eine Fehlermeldung oder undefined bei Erfolg.
+        async anmelden(): Promise<string | undefined> {
             if (!client) return 'Cloud ist nicht eingerichtet.';
-            const { error } = await client.auth.signInWithOtp({
-                email,
-                options: { emailRedirectTo: window.location.origin + window.location.pathname },
-            });
-            return error?.message;
+            try {
+                await signInWithPopup(client.auth, new GoogleAuthProvider());
+                return undefined;
+            } catch (e) {
+                return e instanceof Error ? e.message : String(e);
+            }
         },
         async abmelden() {
-            await client?.auth.signOut();
+            if (client) await signOut(client.auth);
         },
         cloudUebernehmen: (cloud: CloudStand) => abgleich?.cloudUebernehmen(cloud),
         lokalHochladen: (cloud: CloudStand) => abgleich?.lokalHochladen(cloud),
