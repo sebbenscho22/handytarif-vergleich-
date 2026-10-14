@@ -19,6 +19,14 @@ npm run preview    # http://localhost:4173
 
 `dist/index.html` per Doppelklick zu öffnen funktioniert nicht, der Browser blockiert das. Immer über einen Server starten.
 
+## Online (GitHub Pages)
+
+Jeder Push auf `master` (oder `main`) wird getestet, gebaut und veröffentlicht
+(`.github/workflows/pages.yml`). Kostenlos, solange das Repository öffentlich ist.
+Öffentlich ist nur der Code; deine Tarifdaten bleiben in deinem Browser.
+
+Einmalig im Repository einstellen: **Settings → Pages → Source: GitHub Actions**.
+
 ## Bedienung
 
 1. **Tarife** und **Geräte** anlegen (Preise inkl. USt., mit Preisstand).
