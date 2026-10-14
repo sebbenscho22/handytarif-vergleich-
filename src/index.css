@@ -207,7 +207,47 @@ p {
 .fehlerbox {
   background: var(--fehler-zart);
   color: var(--fehler);
+}
+
+.karte .fehlerbox,
+.gutbox {
   margin-top: 16px;
+}
+
+.gutbox {
+  background: var(--gut-zart);
+  color: var(--gut);
+}
+
+.kacheln {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.kachel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid var(--rand);
+  border-radius: var(--radius);
+  background: var(--flaeche-2);
+  padding: 16px;
+}
+
+.kachel h3 {
+  font-size: 1rem;
+}
+
+.kachel button {
+  margin-top: auto;
+}
+
+.bestand {
+  margin-top: 20px;
+  font-size: 0.875rem;
+  color: var(--text-leise);
 }
 
 .leer {

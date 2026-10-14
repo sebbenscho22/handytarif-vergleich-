@@ -79,7 +79,7 @@ export function VergleichSeite({ app }: { app: AppAktionen }) {
                                 <dt>Tarif ({kosten.zeitraumMonate} Monate)</dt>
                                 <dd>{formatEuro(kosten.tarifCent)}</dd>
                                 <dt>Rabatte</dt>
-                                <dd>−{formatEuro(kosten.rabattCent)}</dd>
+                                <dd>{kosten.rabattCent > 0 ? '−' : ''}{formatEuro(kosten.rabattCent)}</dd>
                                 <dt>Einmalkosten</dt>
                                 <dd>{formatEuro(kosten.einmaligCent)}</dd>
                                 <dt>Servicepauschale</dt>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AngeboteSeite } from './components/AngeboteSeite';
+import { DatenSeite } from './components/DatenSeite';
 import { GeraeteSeite } from './components/GeraeteSeite';
 import { TarifeSeite } from './components/TarifeSeite';
 import { VergleichSeite } from './components/VergleichSeite';
@@ -10,6 +11,7 @@ const SEITEN = {
     angebote: 'Angebote',
     tarife: 'Tarife',
     geraete: 'Geräte',
+    daten: 'Daten',
 } as const;
 
 type Seite = keyof typeof SEITEN;
@@ -23,6 +25,7 @@ export default function App() {
         angebote: app.daten.angebote.length,
         tarife: app.daten.tarife.length,
         geraete: app.daten.geraete.length,
+        daten: undefined,
     };
 
     return (
@@ -51,14 +54,14 @@ export default function App() {
                     ))}
                 </nav>
             </header>
-            <p className="hinweisbox warnbox">
-                Daten werden noch nicht gespeichert – beim Neuladen der Seite ist alles weg.
-            </p>
+            {app.ladeWarnung && <p className="hinweisbox warnbox">{app.ladeWarnung}</p>}
+            {app.speicherFehler && <p className="hinweisbox fehlerbox">{app.speicherFehler}</p>}
             <main>
                 {seite === 'vergleich' && <VergleichSeite app={app} />}
                 {seite === 'angebote' && <AngeboteSeite app={app} />}
                 {seite === 'tarife' && <TarifeSeite app={app} />}
                 {seite === 'geraete' && <GeraeteSeite app={app} />}
+                {seite === 'daten' && <DatenSeite app={app} />}
             </main>
         </>
     );
