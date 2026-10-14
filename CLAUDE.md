@@ -21,3 +21,10 @@ TypeScript, React, Vite, Vitest. Windows 10, WebStorm, PowerShell.
 
 ## Ton
 Deutsch, direkt, ohne Floskeln, kein Lob. Schwache Entscheidungen klar benennen und eine konkrete Empfehlung geben. Der Nutzer hat Grundkenntnisse: kurz und verständlich erklären.
+
+## Git
+- Arbeite pro Feature auf einem eigenen Branch (feature/<name>), nie direkt auf main.
+- Committe nach jeder abgeschlossenen Teilaufgabe mit einer kurzen, klaren Nachricht auf Deutsch.
+- Führe Tests und npm run build vor jedem Commit aus und committe nur, wenn beides fehlerfrei läuft.
+- Mergen in main, pushen und Branches löschen mache ich selbst. Tu das nur auf ausdrückliche Anweisung.
+- Nutze nie git push --force oder git reset --hard ohne meine ausdrückliche Zustimmung.
