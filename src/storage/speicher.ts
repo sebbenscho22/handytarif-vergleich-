@@ -1,9 +1,12 @@
 // Zugriff auf localStorage. Der Speicher wird übergeben, damit die Tests ohne Browser laufen.
 import { alsJson, ausJson, leereDaten } from '../domain/backup';
+import { bereinigeSpaltenAuswahl } from '../domain/spalten';
 import type { AppDaten } from '../domain/types';
 
 export const SPEICHER_SCHLUESSEL = 'handytarif-vergleich';
 export const DEFEKT_SCHLUESSEL = 'handytarif-vergleich-defekt';
+// Anzeige-Einstellung, gehört nicht zum Backup
+export const SPALTEN_SCHLUESSEL = 'handytarif-vergleich-spalten';
 
 export type Speicher = Pick<Storage, 'getItem' | 'setItem'>;
 
@@ -44,6 +47,25 @@ export function speichern(speicher: Speicher, daten: AppDaten): string | undefin
         return undefined;
     } catch (e) {
         return `Speichern fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`;
+    }
+}
+
+// Gewählte Tabellenspalten. Fehlt oder kaputt → Standardauswahl.
+export function ladeSpaltenAuswahl(speicher: Speicher): string[] {
+    try {
+        const roh = speicher.getItem(SPALTEN_SCHLUESSEL);
+        return bereinigeSpaltenAuswahl(roh === null ? null : JSON.parse(roh));
+    } catch {
+        return bereinigeSpaltenAuswahl(null);
+    }
+}
+
+// Fehler werden ignoriert: Die Auswahl gilt dann nur bis zum Neuladen.
+export function speichereSpaltenAuswahl(speicher: Speicher, ids: string[]): void {
+    try {
+        speicher.setItem(SPALTEN_SCHLUESSEL, JSON.stringify(ids));
+    } catch {
+        // bewusst leer
     }
 }
 

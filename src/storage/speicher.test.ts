@@ -2,7 +2,17 @@
 import { describe, expect, it } from 'vitest';
 import { leereDaten } from '../domain/backup';
 import type { AppDaten } from '../domain/types';
-import { DEFEKT_SCHLUESSEL, laden, SPEICHER_SCHLUESSEL, speichern, type Speicher } from './speicher';
+import { STANDARD_SPALTEN } from '../domain/spalten';
+import {
+    DEFEKT_SCHLUESSEL,
+    ladeSpaltenAuswahl,
+    laden,
+    SPALTEN_SCHLUESSEL,
+    SPEICHER_SCHLUESSEL,
+    speichereSpaltenAuswahl,
+    speichern,
+    type Speicher,
+} from './speicher';
 
 function testSpeicher(start: Record<string, string> = {}) {
     const inhalt = new Map(Object.entries(start));
@@ -50,5 +60,28 @@ describe('speichern und laden', () => {
     it('nicht verfügbarer Speicher führt zu Warnung bzw. Fehlermeldung', () => {
         expect(laden(kaputt).warnung).toContain('nicht verfügbar');
         expect(speichern(kaputt, daten)).toBe('Speichern fehlgeschlagen: voll');
+    });
+});
+
+describe('Spaltenauswahl', () => {
+    it('speichert und lädt die Auswahl unter eigenem Schlüssel', () => {
+        const { speicher, inhalt } = testSpeicher();
+        speichereSpaltenAuswahl(speicher, ['anbieter', 'netz']);
+        expect(inhalt.has(SPEICHER_SCHLUESSEL)).toBe(false);
+        expect(JSON.parse(inhalt.get(SPALTEN_SCHLUESSEL)!)).toEqual(['anbieter', 'netz']);
+        expect(ladeSpaltenAuswahl(speicher)).toEqual(['anbieter', 'netz']);
+    });
+
+    it('liefert ohne gespeicherte Auswahl den Standard', () => {
+        expect(ladeSpaltenAuswahl(testSpeicher().speicher)).toEqual(STANDARD_SPALTEN);
+    });
+
+    it('liefert bei kaputtem JSON oder gesperrtem Speicher den Standard', () => {
+        expect(ladeSpaltenAuswahl(testSpeicher({ [SPALTEN_SCHLUESSEL]: '{kaputt' }).speicher)).toEqual(STANDARD_SPALTEN);
+        expect(ladeSpaltenAuswahl(kaputt)).toEqual(STANDARD_SPALTEN);
+    });
+
+    it('wirft beim Speichern nicht, wenn der Speicher gesperrt ist', () => {
+        expect(() => speichereSpaltenAuswahl(kaputt, ['anbieter'])).not.toThrow();
     });
 });
