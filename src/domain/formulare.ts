@@ -108,6 +108,7 @@ export interface TarifEingabe {
     minutenInland: string;
     minutenAusland: string;
     smsInland: string;
+    smsAusland: string;
     netz: '' | Netztechnik;
     preisStand: string;
     notiz: string;
@@ -130,6 +131,7 @@ export function tarifEingabeAus(t?: Tarif): TarifEingabe {
         minutenInland: k(t?.minutenInland),
         minutenAusland: k(t?.minutenAusland),
         smsInland: k(t?.smsInland),
+        smsAusland: k(t?.smsAusland),
         netz: t?.netz ?? '',
         preisStand: t?.preisStand ?? '',
         notiz: t?.notiz ?? '',
@@ -180,6 +182,7 @@ export function tarifAuswerten(e: TarifEingabe, id: string, alt?: Tarif): Ergebn
         minutenInland: kontingent(e.minutenInland, 'Minuten Österreich'),
         minutenAusland: kontingent(e.minutenAusland, 'Minuten Ausland'),
         smsInland: kontingent(e.smsInland, 'SMS Österreich'),
+        smsAusland: kontingent(e.smsAusland, 'SMS Ausland'),
         netz: e.netz === '' ? undefined : e.netz,
         preisStand: leerZuUndefined(e.preisStand),
         notiz: leerZuUndefined(e.notiz),

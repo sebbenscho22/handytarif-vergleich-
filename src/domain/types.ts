@@ -30,6 +30,7 @@ export interface Tarif {
     minutenEu?: Kontingent;
     minutenAusland?: Kontingent;
     smsInland?: Kontingent;
+    smsAusland?: Kontingent;
     auslandEuCentProMinute?: number;   // Anzeige/Vergleich, nicht Teil der Gesamtkosten
     auslandWeltCentProMinute?: number; // dito
     preisStand?: string;               // ISO-Datum, z. B. "2026-10-14"

@@ -164,6 +164,9 @@ function TarifFormular({ alt, onSpeichern, onAbbrechen }: FormularProps) {
                 <Feld label="SMS Österreich" hinweis="Zahl oder „unbegrenzt“">
                     <input value={e.smsInland} onChange={(ev) => feld('smsInland', ev.target.value)} />
                 </Feld>
+                <Feld label="SMS Ausland" hinweis="Zahl oder „unbegrenzt“">
+                    <input value={e.smsAusland} onChange={(ev) => feld('smsAusland', ev.target.value)} />
+                </Feld>
             </div>
             <h3 className="gruppe">Sonstiges</h3>
             <div className="felder">

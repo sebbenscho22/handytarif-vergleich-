@@ -124,6 +124,7 @@ export function pruefeTarif(tarif: unknown, praefix = ''): Fehler[] {
             minutenEu: KONTINGENT,
             minutenAusland: KONTINGENT,
             smsInland: KONTINGENT,
+            smsAusland: KONTINGENT,
             auslandEuCentProMinute: ZAHL,
             auslandWeltCentProMinute: ZAHL,
             preisStand: DATUM,

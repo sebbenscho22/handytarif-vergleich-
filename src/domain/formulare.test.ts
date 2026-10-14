@@ -83,6 +83,7 @@ describe('tarifAuswerten', () => {
             minutenInland: 'unbegrenzt',
             minutenAusland: '100',
             smsInland: '1000',
+            smsAusland: '0',
         };
         const r = tarifAuswerten(tarifEingabe(felder), 't1');
         expect(r.ok && r.wert).toMatchObject({
@@ -91,6 +92,7 @@ describe('tarifAuswerten', () => {
             minutenInland: 'unbegrenzt',
             minutenAusland: 100,
             smsInland: 1000,
+            smsAusland: 0,
         });
         expect(r.ok && tarifEingabeAus(r.wert)).toMatchObject(felder);
     });

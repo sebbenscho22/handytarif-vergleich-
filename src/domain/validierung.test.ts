@@ -68,6 +68,7 @@ describe('pruefeTarif', () => {
             minutenEu: 1000,
             minutenAusland: 0,
             smsInland: 'unbegrenzt',
+            smsAusland: 50,
             auslandEuCentProMinute: 0,
             auslandWeltCentProMinute: 99.5,
             preisStand: '2026-10-14',
@@ -97,6 +98,7 @@ describe('pruefeTarif', () => {
     it.each([
         ['datenOesterreichGb', -1],
         ['minutenEu', 'viele'],
+        ['smsAusland', -5],
         ['downloadMbit', Infinity],
         ['netz', '4G'],
         ['preisStand', '14.10.2026'],
