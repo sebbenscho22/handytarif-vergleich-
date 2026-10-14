@@ -6,6 +6,7 @@ import { TarifeSeite } from './components/TarifeSeite';
 import { VergleichSeite } from './components/VergleichSeite';
 import type { FilterEingaben } from './domain/spalten';
 import { useAppDaten } from './hooks/useAppDaten';
+import { ladeFilterEingaben, sessionSpeicher, speichereFilterEingaben } from './storage/speicher';
 
 const SEITEN = {
     vergleich: 'Vergleich',
@@ -20,8 +21,15 @@ type Seite = keyof typeof SEITEN;
 export default function App() {
     const app = useAppDaten();
     const [seite, setSeite] = useState<Seite>('vergleich');
-    // Gilt für die ganze Sitzung, wird aber nicht gespeichert (Neuladen setzt zurück)
-    const [filterEingaben, setFilterEingaben] = useState<FilterEingaben>({});
+    // Gilt, solange der Tab offen ist (sessionStorage), auch über Neuladen hinweg
+    const [filterEingaben, setFilterEingabenState] = useState<FilterEingaben>(() =>
+        ladeFilterEingaben(sessionSpeicher()),
+    );
+
+    function setFilterEingaben(neu: FilterEingaben) {
+        setFilterEingabenState(neu);
+        speichereFilterEingaben(sessionSpeicher(), neu);
+    }
 
     const anzahl: Record<Seite, number | undefined> = {
         vergleich: undefined,

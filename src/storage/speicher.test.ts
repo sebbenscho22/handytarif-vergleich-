@@ -5,10 +5,13 @@ import type { AppDaten } from '../domain/types';
 import { STANDARD_SPALTEN } from '../domain/spalten';
 import {
     DEFEKT_SCHLUESSEL,
+    FILTER_SCHLUESSEL,
+    ladeFilterEingaben,
     ladeSpaltenAuswahl,
     laden,
     SPALTEN_SCHLUESSEL,
     SPEICHER_SCHLUESSEL,
+    speichereFilterEingaben,
     speichereSpaltenAuswahl,
     speichern,
     type Speicher,
@@ -83,5 +86,25 @@ describe('Spaltenauswahl', () => {
 
     it('wirft beim Speichern nicht, wenn der Speicher gesperrt ist', () => {
         expect(() => speichereSpaltenAuswahl(kaputt, ['anbieter'])).not.toThrow();
+    });
+});
+
+describe('Filtereingaben', () => {
+    it('speichert und lädt die Eingaben unter eigenem Schlüssel', () => {
+        const { speicher, inhalt } = testSpeicher();
+        speichereFilterEingaben(speicher, { anbieter: { text: 'test' }, gesamt: { max: '400' } });
+        expect(inhalt.has(SPEICHER_SCHLUESSEL)).toBe(false);
+        expect(inhalt.has(FILTER_SCHLUESSEL)).toBe(true);
+        expect(ladeFilterEingaben(speicher)).toEqual({ anbieter: { text: 'test' }, gesamt: { max: '400' } });
+    });
+
+    it('liefert ohne, bei kaputten Daten oder gesperrtem Speicher keine Filter', () => {
+        expect(ladeFilterEingaben(testSpeicher().speicher)).toEqual({});
+        expect(ladeFilterEingaben(testSpeicher({ [FILTER_SCHLUESSEL]: '{kaputt' }).speicher)).toEqual({});
+        expect(ladeFilterEingaben(kaputt)).toEqual({});
+    });
+
+    it('wirft beim Speichern nicht, wenn der Speicher gesperrt ist', () => {
+        expect(() => speichereFilterEingaben(kaputt, {})).not.toThrow();
     });
 });

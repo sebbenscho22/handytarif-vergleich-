@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
     SPALTEN,
     STANDARD_SPALTEN,
+    bereinigeFilterEingaben,
     bereinigeSpaltenAuswahl,
     filterAusEingaben,
     filtereTreffer,
@@ -183,5 +184,32 @@ describe('filtereTreffer', () => {
     it('verändert die übergebenen Treffer nicht', () => {
         filtereTreffer(treffer, { gesamt: { min: 40000 } });
         expect(treffer[1].mehrkostenCent).toBe(24000);
+    });
+});
+
+describe('bereinigeFilterEingaben', () => {
+    it('behält bekannte Spalten mit Text-Werten', () => {
+        expect(bereinigeFilterEingaben({ anbieter: { text: 'test' }, gesamt: { min: '10', max: 'x' } })).toEqual({
+            anbieter: { text: 'test' },
+            gesamt: { min: '10', max: 'x' },
+        });
+    });
+
+    it('entfernt Unbekanntes, falsche Typen und leere Einträge', () => {
+        expect(
+            bereinigeFilterEingaben({
+                gibtsnicht: { text: 'a' },
+                anbieter: { text: 5, sonst: 'b' },
+                gesamt: { min: '' },
+                netz: 'LTE',
+                bindung: { max: '24' },
+            }),
+        ).toEqual({ bindung: { max: '24' } });
+    });
+
+    it('liefert bei Unsinn ein leeres Objekt', () => {
+        expect(bereinigeFilterEingaben(null)).toEqual({});
+        expect(bereinigeFilterEingaben([{ text: 'a' }])).toEqual({});
+        expect(bereinigeFilterEingaben('anbieter')).toEqual({});
     });
 });

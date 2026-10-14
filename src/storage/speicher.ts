@@ -1,12 +1,14 @@
 // Zugriff auf localStorage. Der Speicher wird übergeben, damit die Tests ohne Browser laufen.
 import { alsJson, ausJson, leereDaten } from '../domain/backup';
-import { bereinigeSpaltenAuswahl } from '../domain/spalten';
+import { bereinigeFilterEingaben, bereinigeSpaltenAuswahl, type FilterEingaben } from '../domain/spalten';
 import type { AppDaten } from '../domain/types';
 
 export const SPEICHER_SCHLUESSEL = 'handytarif-vergleich';
 export const DEFEKT_SCHLUESSEL = 'handytarif-vergleich-defekt';
 // Anzeige-Einstellung, gehört nicht zum Backup
 export const SPALTEN_SCHLUESSEL = 'handytarif-vergleich-spalten';
+// im sessionStorage, gehört nicht zum Backup
+export const FILTER_SCHLUESSEL = 'handytarif-vergleich-filter';
 
 export type Speicher = Pick<Storage, 'getItem' | 'setItem'>;
 
@@ -69,18 +71,46 @@ export function speichereSpaltenAuswahl(speicher: Speicher, ids: string[]): void
     }
 }
 
-// localStorage kann fehlen oder beim Zugriff werfen (z. B. gesperrte Website-Daten).
-export function browserSpeicher(): Speicher {
+// Filter der Vergleichsseite. Fehlt oder kaputt → keine Filter.
+export function ladeFilterEingaben(speicher: Speicher): FilterEingaben {
     try {
-        return window.localStorage;
+        const roh = speicher.getItem(FILTER_SCHLUESSEL);
+        return bereinigeFilterEingaben(roh === null ? null : JSON.parse(roh));
+    } catch {
+        return {};
+    }
+}
+
+// Fehler werden ignoriert: Die Filter gelten dann nur bis zum Neuladen.
+export function speichereFilterEingaben(speicher: Speicher, eingaben: FilterEingaben): void {
+    try {
+        speicher.setItem(FILTER_SCHLUESSEL, JSON.stringify(eingaben));
+    } catch {
+        // bewusst leer
+    }
+}
+
+// Der Speicher kann fehlen oder beim Zugriff werfen (z. B. gesperrte Website-Daten).
+function oeffneSpeicher(name: 'localStorage' | 'sessionStorage'): Speicher {
+    try {
+        return window[name];
     } catch {
         return {
             getItem: () => {
-                throw new Error('localStorage nicht verfügbar');
+                throw new Error(`${name} nicht verfügbar`);
             },
             setItem: () => {
-                throw new Error('localStorage nicht verfügbar');
+                throw new Error(`${name} nicht verfügbar`);
             },
         };
     }
+}
+
+export function browserSpeicher(): Speicher {
+    return oeffneSpeicher('localStorage');
+}
+
+// Gilt nur, solange der Tab offen ist.
+export function sessionSpeicher(): Speicher {
+    return oeffneSpeicher('sessionStorage');
 }

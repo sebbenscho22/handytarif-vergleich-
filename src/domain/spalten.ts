@@ -137,6 +137,24 @@ export interface FilterEingabe {
 
 export type FilterEingaben = Record<string, FilterEingabe>;
 
+// Für gespeicherte Eingaben: nur bekannte Spalten und Text-Werte, leere Einträge fallen weg.
+export function bereinigeFilterEingaben(roh: unknown): FilterEingaben {
+    if (typeof roh !== 'object' || roh === null || Array.isArray(roh)) return {};
+    const quelle = roh as Record<string, unknown>;
+    const ergebnis: FilterEingaben = {};
+    for (const spalte of SPALTEN) {
+        const e = quelle[spalte.id];
+        if (typeof e !== 'object' || e === null) continue;
+        const eintrag: FilterEingabe = {};
+        for (const feld of ['text', 'min', 'max'] as const) {
+            const w = (e as Record<string, unknown>)[feld];
+            if (typeof w === 'string' && w !== '') eintrag[feld] = w;
+        }
+        if (Object.keys(eintrag).length > 0) ergebnis[spalte.id] = eintrag;
+    }
+    return ergebnis;
+}
+
 // "" → undefined (keine Grenze), ungültig → null
 export function parseFilterGrenze(spalte: Spalte, text: string): number | undefined | null {
     if (text.trim() === '') return undefined;
