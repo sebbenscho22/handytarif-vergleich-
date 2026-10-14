@@ -9,12 +9,18 @@ import { VergleichTabelle } from './VergleichTabelle';
 
 type Ansicht = 'uebersicht' | 'tabelle';
 
-export function VergleichSeite({ app }: { app: AppAktionen }) {
+interface Props {
+    app: AppAktionen;
+    // Liegt in App, damit die Filter beim Wechsel der Reiter erhalten bleiben
+    filterEingaben: FilterEingaben;
+    setFilterEingaben: (neu: FilterEingaben) => void;
+}
+
+export function VergleichSeite({ app, filterEingaben, setFilterEingaben }: Props) {
     const { daten } = app;
     const { treffer: alleTreffer, fehler } = vergleicheAngebote(daten);
     const [zeitraumText, setZeitraumText] = useState(daten.vergleichszeitraumMonate.toString());
     const [ansicht, setAnsicht] = useState<Ansicht>('uebersicht');
-    const [filterEingaben, setFilterEingaben] = useState<FilterEingaben>({});
     const { filter, ungueltig } = filterAusEingaben(filterEingaben);
     const treffer = filtereTreffer(alleTreffer, filter);
     const filterAktiv = Object.keys(filter).length;

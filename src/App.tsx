@@ -4,6 +4,7 @@ import { DatenSeite } from './components/DatenSeite';
 import { GeraeteSeite } from './components/GeraeteSeite';
 import { TarifeSeite } from './components/TarifeSeite';
 import { VergleichSeite } from './components/VergleichSeite';
+import type { FilterEingaben } from './domain/spalten';
 import { useAppDaten } from './hooks/useAppDaten';
 
 const SEITEN = {
@@ -19,6 +20,8 @@ type Seite = keyof typeof SEITEN;
 export default function App() {
     const app = useAppDaten();
     const [seite, setSeite] = useState<Seite>('vergleich');
+    // Gilt für die ganze Sitzung, wird aber nicht gespeichert (Neuladen setzt zurück)
+    const [filterEingaben, setFilterEingaben] = useState<FilterEingaben>({});
 
     const anzahl: Record<Seite, number | undefined> = {
         vergleich: undefined,
@@ -57,7 +60,9 @@ export default function App() {
             {app.ladeWarnung && <p className="hinweisbox warnbox">{app.ladeWarnung}</p>}
             {app.speicherFehler && <p className="hinweisbox fehlerbox">{app.speicherFehler}</p>}
             <main>
-                {seite === 'vergleich' && <VergleichSeite app={app} />}
+                {seite === 'vergleich' && (
+                    <VergleichSeite app={app} filterEingaben={filterEingaben} setFilterEingaben={setFilterEingaben} />
+                )}
                 {seite === 'angebote' && <AngeboteSeite app={app} />}
                 {seite === 'tarife' && <TarifeSeite app={app} />}
                 {seite === 'geraete' && <GeraeteSeite app={app} />}
