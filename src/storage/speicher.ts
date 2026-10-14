@@ -1,10 +1,12 @@
 // Zugriff auf localStorage. Der Speicher wird übergeben, damit die Tests ohne Browser laufen.
 import { alsJson, ausJson, leereDaten } from '../domain/backup';
 import { bereinigeFilterEingaben, bereinigeSpaltenAuswahl, type FilterEingaben } from '../domain/spalten';
+import { pruefeSyncStand, type SyncStand } from '../domain/sync';
 import type { AppDaten } from '../domain/types';
 
 export const SPEICHER_SCHLUESSEL = 'handytarif-vergleich';
 export const DEFEKT_SCHLUESSEL = 'handytarif-vergleich-defekt';
+export const SYNC_SCHLUESSEL = 'handytarif-vergleich-sync';
 // Anzeige-Einstellung, gehört nicht zum Backup
 export const SPALTEN_SCHLUESSEL = 'handytarif-vergleich-spalten';
 // im sessionStorage, gehört nicht zum Backup
@@ -49,6 +51,24 @@ export function speichern(speicher: Speicher, daten: AppDaten): string | undefin
         return undefined;
     } catch (e) {
         return `Speichern fehlgeschlagen: ${e instanceof Error ? e.message : String(e)}`;
+    }
+}
+
+// Stand des Cloud-Abgleichs. Gehört nicht zum Backup, darum ein eigener Schlüssel.
+export function syncStandLaden(speicher: Speicher): SyncStand | null {
+    try {
+        const roh = speicher.getItem(SYNC_SCHLUESSEL);
+        return roh === null ? null : pruefeSyncStand(JSON.parse(roh));
+    } catch {
+        return null;
+    }
+}
+
+export function syncStandSpeichern(speicher: Speicher, stand: SyncStand): void {
+    try {
+        speicher.setItem(SYNC_SCHLUESSEL, JSON.stringify(stand));
+    } catch {
+        // Ohne gespeicherten Stand fragt die App beim nächsten Start nach, statt Daten zu verlieren.
     }
 }
 

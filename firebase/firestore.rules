@@ -1,0 +1,21 @@
+// Einmalig in der Firebase-Konsole einfügen: Firestore Database → Regeln → Inhalt ersetzen → Veröffentlichen.
+// Ein Dokument pro Benutzer unter nutzer/{uid}. Es enthält denselben JSON-Block wie das Backup (AppDaten) als Text.
+// Pflicht, weil die Firebase-Konfiguration öffentlich im Browser-Code steht.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Jeder angemeldete Benutzer sieht und ändert nur sein eigenes Dokument.
+    // Nur für dich allein: in der Konsole (nicht hier im öffentlichen Repository) zusätzlich
+    //   && request.auth.token.email == 'DEINE-ADRESSE@gmail.com'
+    // an beide Bedingungen anhängen.
+    match /nutzer/{uid} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['inhalt', 'revision', 'geaendertAm'])
+        && request.resource.data.inhalt is string
+        && request.resource.data.inhalt.size() < 900000
+        && request.resource.data.revision is string
+        && request.resource.data.geaendertAm == request.time;
+    }
+  }
+}

@@ -14,6 +14,9 @@ import {
     speichereFilterEingaben,
     speichereSpaltenAuswahl,
     speichern,
+    SYNC_SCHLUESSEL,
+    syncStandLaden,
+    syncStandSpeichern,
     type Speicher,
 } from './speicher';
 
@@ -106,5 +109,20 @@ describe('Filtereingaben', () => {
 
     it('wirft beim Speichern nicht, wenn der Speicher gesperrt ist', () => {
         expect(() => speichereFilterEingaben(kaputt, {})).not.toThrow();
+    });
+});
+
+describe('Sync-Stand', () => {
+    it('wird gespeichert und wieder geladen', () => {
+        const { speicher } = testSpeicher();
+        expect(syncStandLaden(speicher)).toBeNull();
+        syncStandSpeichern(speicher, { basis: 'T1', lokalGeaendert: true });
+        expect(syncStandLaden(speicher)).toEqual({ basis: 'T1', lokalGeaendert: true });
+    });
+
+    it('defekter oder nicht verfügbarer Speicher → null, kein Absturz', () => {
+        expect(syncStandLaden(testSpeicher({ [SYNC_SCHLUESSEL]: '{kaputt' }).speicher)).toBeNull();
+        expect(syncStandLaden(kaputt)).toBeNull();
+        expect(() => syncStandSpeichern(kaputt, { basis: null, lokalGeaendert: false })).not.toThrow();
     });
 });
