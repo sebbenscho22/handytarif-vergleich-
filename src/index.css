@@ -1,111 +1,295 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --text: #1f2328;
+  --text-leise: #59636e;
+  --bg: #ffffff;
+  --flaeche: #f6f8fa;
+  --rand: #d1d9e0;
+  --akzent: #0b6bcb;
+  --akzent-text: #ffffff;
+  --gut-bg: #e6f4ea;
+  --fehler: #b42318;
+  --warn: #9a6700;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 16px/1.5 var(--sans);
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+    --text: #e6edf3;
+    --text-leise: #9198a1;
+    --bg: #0d1117;
+    --flaeche: #151b23;
+    --rand: #3d444d;
+    --akzent: #4493f8;
+    --akzent-text: #0d1117;
+    --gut-bg: #12301d;
+    --fehler: #f85149;
+    --warn: #d29922;
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+* {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  background: var(--bg);
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+#root {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rand);
+  margin-bottom: 24px;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+  font-size: 1.4rem;
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+h2 {
+  font-size: 1.2rem;
+  margin: 0;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
+h3 {
+  font-size: 1rem;
+  margin: 24px 0 8px;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: var(--flaeche);
+  border: 1px solid var(--rand);
+  border-radius: 6px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--akzent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.aktiv,
+button.primaer {
+  background: var(--akzent);
+  border-color: var(--akzent);
+  color: var(--akzent-text);
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--rand);
+  border-radius: 6px;
   padding: 4px 8px;
-  background: var(--code-bg);
+  min-width: 0;
+}
+
+input[aria-invalid='true'] {
+  border-color: var(--fehler);
+}
+
+textarea {
+  min-height: 4em;
+  resize: vertical;
+}
+
+.kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.leer,
+.erklaerung,
+footer {
+  color: var(--text-leise);
+}
+
+footer {
+  margin-top: 32px;
+  font-size: 0.875rem;
+}
+
+/* Tabellen */
+.tabelle-rahmen {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--rand);
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+  color: var(--text-leise);
+  white-space: nowrap;
+}
+
+.zahl {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.aktionen {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.aktionen button + button {
+  margin-left: 4px;
+}
+
+/* Vergleich */
+.vergleich tr.bester {
+  background: var(--gut-bg);
+}
+
+.vergleich .betrag {
+  font-weight: 600;
+}
+
+.vergleich summary {
+  cursor: pointer;
+}
+
+.aufstellung {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  gap: 0 16px;
+  margin: 8px 0;
+  font-size: 0.875rem;
+}
+
+.aufstellung dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.hinweise,
+.warnzeichen {
+  color: var(--warn);
+  font-size: 0.875rem;
+}
+
+.zeitraum input {
+  width: 4em;
+  text-align: right;
+}
+
+/* Formulare */
+.formular {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.felder {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px 16px;
+}
+
+.feld {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feld-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.feld-hinweis {
+  color: var(--text-leise);
+  font-size: 0.8rem;
+}
+
+.rabatte {
+  border: 1px solid var(--rand);
+  border-radius: 6px;
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.rabatte legend {
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0 4px;
+}
+
+.rabatt-zeile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rabatt-zeile input {
+  width: 10em;
+}
+
+.fehler {
+  color: var(--fehler);
+  margin: 0;
+}
+
+ul.fehler {
+  padding-left: 20px;
+}
+
+.knoepfe {
+  display: flex;
+  gap: 8px;
 }
