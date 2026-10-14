@@ -42,14 +42,25 @@ export function parseGanzzahl(text: string): number | null {
     return Number(t);
 }
 
+// "" → undefined (keine Angabe), "300" / "12,5" / "12.5" → Zahl ab 0. Ungültig → null.
+export function parseZahl(text: string): number | undefined | null {
+    const t = text.trim();
+    if (t === '') return undefined;
+    if (!/^\d+([.,]\d+)?$/.test(t)) return null;
+    return Number(t.replace(',', '.'));
+}
+
 // "" → undefined (keine Angabe), "unbegrenzt"/"u"/"∞" → 'unbegrenzt', "20" / "20,5" → Zahl.
 // Ungültig → null.
 export function parseKontingent(text: string): Kontingent | undefined | null {
     const t = text.trim().toLowerCase();
-    if (t === '') return undefined;
     if (t === 'unbegrenzt' || t === 'u' || t === '∞') return 'unbegrenzt';
-    if (!/^\d+([.,]\d+)?$/.test(t)) return null;
-    return Number(t.replace(',', '.'));
+    return parseZahl(t);
+}
+
+// Zahl → "12,5" (für Eingabefelder)
+export function zahlAlsEingabe(n: number | undefined): string {
+    return n === undefined ? '' : n.toString().replace('.', ',');
 }
 
 export function formatKontingent(k: Kontingent | undefined, einheit: string): string {

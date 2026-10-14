@@ -146,6 +146,24 @@ function TarifFormular({ alt, onSpeichern, onAbbrechen }: FormularProps) {
                         <option value="5G">5G</option>
                     </select>
                 </Feld>
+                <Feld label="Download (Mbit/s)" hinweis="max. laut Anbieter">
+                    <input inputMode="decimal" value={e.downloadMbit} onChange={(ev) => feld('downloadMbit', ev.target.value)} />
+                </Feld>
+                <Feld label="Upload (Mbit/s)" hinweis="max. laut Anbieter">
+                    <input inputMode="decimal" value={e.uploadMbit} onChange={(ev) => feld('uploadMbit', ev.target.value)} />
+                </Feld>
+            </div>
+            <h3 className="gruppe">Telefonie und SMS</h3>
+            <div className="felder">
+                <Feld label="Minuten Österreich" hinweis="Zahl oder „unbegrenzt“">
+                    <input value={e.minutenInland} onChange={(ev) => feld('minutenInland', ev.target.value)} />
+                </Feld>
+                <Feld label="Minuten Ausland" hinweis="Zahl oder „unbegrenzt“">
+                    <input value={e.minutenAusland} onChange={(ev) => feld('minutenAusland', ev.target.value)} />
+                </Feld>
+                <Feld label="SMS Österreich" hinweis="Zahl oder „unbegrenzt“">
+                    <input value={e.smsInland} onChange={(ev) => feld('smsInland', ev.target.value)} />
+                </Feld>
             </div>
             <h3 className="gruppe">Sonstiges</h3>
             <div className="felder">

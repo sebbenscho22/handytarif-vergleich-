@@ -76,6 +76,28 @@ describe('tarifAuswerten', () => {
             preisStand: '2026-10-14',
         });
     });
+    it('übernimmt Geschwindigkeit, Minuten und SMS und liest sie zurück ins Formular', () => {
+        const felder = {
+            downloadMbit: '300',
+            uploadMbit: '12,5',
+            minutenInland: 'unbegrenzt',
+            minutenAusland: '100',
+            smsInland: '1000',
+        };
+        const r = tarifAuswerten(tarifEingabe(felder), 't1');
+        expect(r.ok && r.wert).toMatchObject({
+            downloadMbit: 300,
+            uploadMbit: 12.5,
+            minutenInland: 'unbegrenzt',
+            minutenAusland: 100,
+            smsInland: 1000,
+        });
+        expect(r.ok && tarifEingabeAus(r.wert)).toMatchObject(felder);
+    });
+    it('meldet ungültige Geschwindigkeit und Minuten', () => {
+        const r = tarifAuswerten(tarifEingabe({ downloadMbit: 'unbegrenzt', minutenAusland: 'viele' }), 't1');
+        expect(!r.ok && r.fehler).toEqual(['Download: Zahl erwartet.', 'Minuten Ausland: Zahl oder "unbegrenzt" erwartet.']);
+    });
     it('sammelt alle Fehler', () => {
         const r = tarifAuswerten(
             tarifEingabe({ anbieter: ' ', name: '', preisMonatlich: '', bindungMonate: '1,5', datenEuGb: 'viel' }),

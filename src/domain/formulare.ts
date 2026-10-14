@@ -1,7 +1,7 @@
 // Umwandlung zwischen Formular-Eingaben (alles Text) und dem Datenmodell, inkl. Prüfung.
 import type { Angebot, Geraet, Netztechnik, Rabatt, Tarif } from './types';
 import { type Fehler, fehlerAlsText, pruefeAngebot, pruefeGeraet, pruefeTarif } from './validierung';
-import { centAlsEingabe, parseEuro, parseGanzzahl, parseKontingent } from './zahlen';
+import { centAlsEingabe, parseEuro, parseGanzzahl, parseKontingent, parseZahl, zahlAlsEingabe } from './zahlen';
 
 export type Ergebnis<T> = { ok: true; wert: T } | { ok: false; fehler: string[] };
 
@@ -103,6 +103,11 @@ export interface TarifEingabe {
     servicepauschaleJahr: string;
     datenOesterreichGb: string;
     datenEuGb: string;
+    downloadMbit: string;
+    uploadMbit: string;
+    minutenInland: string;
+    minutenAusland: string;
+    smsInland: string;
     netz: '' | Netztechnik;
     preisStand: string;
     notiz: string;
@@ -120,6 +125,11 @@ export function tarifEingabeAus(t?: Tarif): TarifEingabe {
         servicepauschaleJahr: t ? centAlsEingabe(t.servicepauschaleJahrCent) : '',
         datenOesterreichGb: k(t?.datenOesterreichGb),
         datenEuGb: k(t?.datenEuGb),
+        downloadMbit: zahlAlsEingabe(t?.downloadMbit),
+        uploadMbit: zahlAlsEingabe(t?.uploadMbit),
+        minutenInland: k(t?.minutenInland),
+        minutenAusland: k(t?.minutenAusland),
+        smsInland: k(t?.smsInland),
         netz: t?.netz ?? '',
         preisStand: t?.preisStand ?? '',
         notiz: t?.notiz ?? '',
@@ -127,7 +137,7 @@ export function tarifEingabeAus(t?: Tarif): TarifEingabe {
     };
 }
 
-// `alt`: bisheriger Tarif. Felder, die das Formular nicht kennt (z. B. Minuten), bleiben erhalten.
+// `alt`: bisheriger Tarif. Felder, die das Formular nicht kennt (z. B. Minuten EU), bleiben erhalten.
 export function tarifAuswerten(e: TarifEingabe, id: string, alt?: Tarif): Ergebnis<Tarif> {
     const fehler: string[] = [];
     if (e.anbieter.trim() === '') fehler.push('Anbieter fehlt.');
@@ -140,6 +150,14 @@ export function tarifAuswerten(e: TarifEingabe, id: string, alt?: Tarif): Ergebn
             return undefined;
         }
         return k;
+    };
+    const zahl = (text: string, feld: string) => {
+        const n = parseZahl(text);
+        if (n === null) {
+            fehler.push(`${feld}: Zahl erwartet.`);
+            return undefined;
+        }
+        return n;
     };
 
     const rabatte = rabatteAuswerten(e.rabatte);
@@ -157,6 +175,11 @@ export function tarifAuswerten(e: TarifEingabe, id: string, alt?: Tarif): Ergebn
         rabatte: rabatte.ok ? rabatte.wert : [],
         datenOesterreichGb: kontingent(e.datenOesterreichGb, 'Daten Österreich'),
         datenEuGb: kontingent(e.datenEuGb, 'Daten EU'),
+        downloadMbit: zahl(e.downloadMbit, 'Download'),
+        uploadMbit: zahl(e.uploadMbit, 'Upload'),
+        minutenInland: kontingent(e.minutenInland, 'Minuten Österreich'),
+        minutenAusland: kontingent(e.minutenAusland, 'Minuten Ausland'),
+        smsInland: kontingent(e.smsInland, 'SMS Österreich'),
         netz: e.netz === '' ? undefined : e.netz,
         preisStand: leerZuUndefined(e.preisStand),
         notiz: leerZuUndefined(e.notiz),

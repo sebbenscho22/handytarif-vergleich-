@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { centAlsEingabe, formatEuro, formatKontingent, parseEuro, parseGanzzahl, parseKontingent } from './zahlen';
+import {
+    centAlsEingabe,
+    formatEuro,
+    formatKontingent,
+    parseEuro,
+    parseGanzzahl,
+    parseKontingent,
+    parseZahl,
+    zahlAlsEingabe,
+} from './zahlen';
 
 describe('formatEuro', () => {
     it('formatiert mit Komma und Tausenderpunkt', () => {
@@ -46,6 +55,25 @@ describe('parseGanzzahl', () => {
         expect(parseGanzzahl('')).toBeNull();
         expect(parseGanzzahl('2,5')).toBeNull();
         expect(parseGanzzahl('-1')).toBeNull();
+    });
+});
+
+describe('parseZahl', () => {
+    it('unterscheidet leer, Zahl und ungültig', () => {
+        expect(parseZahl(' ')).toBeUndefined();
+        expect(parseZahl('300')).toBe(300);
+        expect(parseZahl('12,5')).toBe(12.5);
+        expect(parseZahl('12.5')).toBe(12.5);
+        expect(parseZahl('unbegrenzt')).toBeNull();
+        expect(parseZahl('-1')).toBeNull();
+    });
+});
+
+describe('zahlAlsEingabe', () => {
+    it('schreibt Dezimalkomma, leer bei keiner Angabe', () => {
+        expect(zahlAlsEingabe(undefined)).toBe('');
+        expect(zahlAlsEingabe(300)).toBe('300');
+        expect(zahlAlsEingabe(12.5)).toBe('12,5');
     });
 });
 
