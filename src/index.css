@@ -572,6 +572,137 @@ th {
   color: var(--warn);
 }
 
+.ansicht-leiste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filter {
+  border: 1px solid var(--rand);
+  border-radius: var(--radius);
+  background: var(--flaeche-2);
+  margin-bottom: 12px;
+}
+
+.filter summary {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zaehler.aktiv-zaehler {
+  background: var(--akzent);
+  color: var(--akzent-text);
+}
+
+.filter-inhalt {
+  padding: 4px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-gruppe {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.filter-gruppe legend {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-leise);
+  padding: 0 0 6px;
+}
+
+.filter-felder {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px 14px;
+}
+
+.filter-feld {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.filter-feld input {
+  padding: 5px 8px;
+  font-size: 0.875rem;
+}
+
+.von-bis {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-feld.hervor .feld-label,
+.spalten-wahl .hervor {
+  color: var(--akzent);
+}
+
+.filter-fuss {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.filter-fuss .fehler {
+  margin-right: auto;
+}
+
+.spalten-wahl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 4px 14px;
+  font-size: 0.875rem;
+}
+
+.spalten-wahl label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.spalten-wahl input {
+  width: auto;
+}
+
+.vergleich-tabelle td {
+  white-space: nowrap;
+}
+
+.vergleich-tabelle th.hervor {
+  color: var(--akzent);
+}
+
+.vergleich-tabelle td.hervor {
+  font-weight: 600;
+}
+
+.vergleich-tabelle tbody tr.bester {
+  background: var(--gut-zart);
+}
+
+.vergleich-tabelle tbody tr.bester td:first-child {
+  box-shadow: inset 3px 0 0 var(--gut);
+}
+
 @media (max-width: 560px) {
   .eintrag {
     grid-template-columns: auto 1fr;
