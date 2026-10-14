@@ -34,10 +34,10 @@ export function TarifeSeite({ app }: { app: AppAktionen }) {
     }
 
     return (
-        <section>
+        <section className="karte">
             <div className="kopf">
                 <h2>Tarife</h2>
-                <button onClick={() => setBearbeiteId('neu')}>+ Tarif</button>
+                <button className="primaer" onClick={() => setBearbeiteId('neu')}>+ Tarif</button>
             </div>
             {tarife.length === 0 ? (
                 <p className="leer">Noch keine Tarife erfasst.</p>
@@ -65,8 +65,8 @@ export function TarifeSeite({ app }: { app: AppAktionen }) {
                                     <td className="zahl">{formatKontingent(t.datenOesterreichGb, 'GB')}</td>
                                     <td>{t.preisStand ?? '–'}</td>
                                     <td className="aktionen">
-                                        <button onClick={() => setBearbeiteId(t.id)}>Bearbeiten</button>
-                                        <button onClick={() => loeschen(t)}>Löschen</button>
+                                        <button className="leise" onClick={() => setBearbeiteId(t.id)}>Bearbeiten</button>
+                                        <button className="gefahr" onClick={() => loeschen(t)}>Löschen</button>
                                     </td>
                                 </tr>
                             ))}
@@ -100,8 +100,9 @@ function TarifFormular({ alt, onSpeichern, onAbbrechen }: FormularProps) {
     }
 
     return (
-        <form className="formular" onSubmit={absenden}>
+        <form className="formular karte" onSubmit={absenden}>
             <h2>{alt ? 'Tarif bearbeiten' : 'Neuer Tarif'}</h2>
+            <h3 className="gruppe">Grunddaten</h3>
             <div className="felder">
                 <Feld label="Anbieter *">
                     <input value={e.anbieter} onChange={(ev) => feld('anbieter', ev.target.value)} />
@@ -109,6 +110,9 @@ function TarifFormular({ alt, onSpeichern, onAbbrechen }: FormularProps) {
                 <Feld label="Tarifname *">
                     <input value={e.name} onChange={(ev) => feld('name', ev.target.value)} />
                 </Feld>
+            </div>
+            <h3 className="gruppe">Kosten</h3>
+            <div className="felder">
                 <Feld label="Monatspreis € *" hinweis="regulärer Preis, Rabatte unten">
                     <input inputMode="decimal" value={e.preisMonatlich} onChange={(ev) => feld('preisMonatlich', ev.target.value)} />
                 </Feld>
@@ -125,6 +129,10 @@ function TarifFormular({ alt, onSpeichern, onAbbrechen }: FormularProps) {
                         onChange={(ev) => feld('servicepauschaleJahr', ev.target.value)}
                     />
                 </Feld>
+            </div>
+            <RabattEditor titel="Rabatte (gelten immer für diesen Tarif)" zeilen={e.rabatte} onChange={(r) => feld('rabatte', r)} />
+            <h3 className="gruppe">Leistung</h3>
+            <div className="felder">
                 <Feld label="Daten Österreich (GB)" hinweis="Zahl oder „unbegrenzt“">
                     <input value={e.datenOesterreichGb} onChange={(ev) => feld('datenOesterreichGb', ev.target.value)} />
                 </Feld>
@@ -138,14 +146,16 @@ function TarifFormular({ alt, onSpeichern, onAbbrechen }: FormularProps) {
                         <option value="5G">5G</option>
                     </select>
                 </Feld>
-                <Feld label="Preisstand">
+            </div>
+            <h3 className="gruppe">Sonstiges</h3>
+            <div className="felder">
+                <Feld label="Preisstand" hinweis="wann du den Preis geprüft hast">
                     <input type="date" value={e.preisStand} onChange={(ev) => feld('preisStand', ev.target.value)} />
                 </Feld>
                 <Feld label="Notiz">
                     <textarea value={e.notiz} onChange={(ev) => feld('notiz', ev.target.value)} />
                 </Feld>
             </div>
-            <RabattEditor titel="Rabatte (gelten immer für diesen Tarif)" zeilen={e.rabatte} onChange={(r) => feld('rabatte', r)} />
             <Fehlerliste fehler={fehler} />
             <div className="knoepfe">
                 <button type="submit" className="primaer">Speichern</button>

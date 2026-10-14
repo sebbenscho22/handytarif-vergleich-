@@ -6,6 +6,7 @@ export interface VergleichsTreffer {
     tarif: Tarif;
     geraet: Geraet | undefined;
     kosten: Kostenaufstellung;
+    mehrkostenCent: number; // gegenüber dem günstigsten Angebot, 0 beim günstigsten
 }
 
 export interface VergleichsFehler {
@@ -36,12 +37,16 @@ export function vergleicheAngebote(daten: AppDaten): Vergleich {
         }
         try {
             const kosten = berechneGesamtkosten(angebot, tarif, geraet, daten.vergleichszeitraumMonate);
-            treffer.push({ angebot, tarif, geraet, kosten });
+            treffer.push({ angebot, tarif, geraet, kosten, mehrkostenCent: 0 });
         } catch (e) {
             fehler.push({ angebot, fehler: e instanceof Error ? e.message : String(e) });
         }
     }
 
     treffer.sort((a, b) => a.kosten.gesamtCent - b.kosten.gesamtCent);
+    const guenstigst = treffer[0]?.kosten.gesamtCent ?? 0;
+    for (const t of treffer) {
+        t.mehrkostenCent = t.kosten.gesamtCent - guenstigst;
+    }
     return { treffer, fehler };
 }

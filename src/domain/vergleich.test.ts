@@ -43,6 +43,7 @@ describe('vergleicheAngebote', () => {
             ['a1', 72000],
             ['a2', 74000],
         ]);
+        expect(treffer.map((t) => t.mehrkostenCent)).toEqual([0, 48000, 50000]);
         expect(fehler).toEqual([]);
     });
 

@@ -33,10 +33,10 @@ export function GeraeteSeite({ app }: { app: AppAktionen }) {
     }
 
     return (
-        <section>
+        <section className="karte">
             <div className="kopf">
                 <h2>Geräte</h2>
-                <button onClick={() => setBearbeiteId('neu')}>+ Gerät</button>
+                <button className="primaer" onClick={() => setBearbeiteId('neu')}>+ Gerät</button>
             </div>
             {geraete.length === 0 ? (
                 <p className="leer">Noch keine Geräte erfasst.</p>
@@ -58,8 +58,8 @@ export function GeraeteSeite({ app }: { app: AppAktionen }) {
                                     <td className="zahl">{formatEuro(g.preisFreiCent)}</td>
                                     <td>{g.preisStand ?? '–'}</td>
                                     <td className="aktionen">
-                                        <button onClick={() => setBearbeiteId(g.id)}>Bearbeiten</button>
-                                        <button onClick={() => loeschen(g)}>Löschen</button>
+                                        <button className="leise" onClick={() => setBearbeiteId(g.id)}>Bearbeiten</button>
+                                        <button className="gefahr" onClick={() => loeschen(g)}>Löschen</button>
                                     </td>
                                 </tr>
                             ))}
@@ -93,7 +93,7 @@ function GeraetFormular({ alt, onSpeichern, onAbbrechen }: FormularProps) {
     }
 
     return (
-        <form className="formular" onSubmit={absenden}>
+        <form className="formular karte" onSubmit={absenden}>
             <h2>{alt ? 'Gerät bearbeiten' : 'Neues Gerät'}</h2>
             <div className="felder">
                 <Feld label="Modell *" hinweis="inkl. Speichergröße">

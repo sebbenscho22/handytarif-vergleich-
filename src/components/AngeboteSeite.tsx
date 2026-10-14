@@ -26,10 +26,10 @@ export function AngeboteSeite({ app }: { app: AppAktionen }) {
     }
 
     return (
-        <section>
+        <section className="karte">
             <div className="kopf">
                 <h2>Angebote</h2>
-                <button onClick={() => setBearbeiteId('neu')} disabled={daten.tarife.length === 0}>
+                <button className="primaer" onClick={() => setBearbeiteId('neu')} disabled={daten.tarife.length === 0}>
                     + Angebot
                 </button>
             </div>
@@ -57,8 +57,9 @@ export function AngeboteSeite({ app }: { app: AppAktionen }) {
                                     <td>{ART_TEXT[a.art]}</td>
                                     <td>{a.notiz ?? ''}</td>
                                     <td className="aktionen">
-                                        <button onClick={() => setBearbeiteId(a.id)}>Bearbeiten</button>
+                                        <button className="leise" onClick={() => setBearbeiteId(a.id)}>Bearbeiten</button>
                                         <button
+                                            className="gefahr"
                                             onClick={() => {
                                                 if (confirm('Angebot löschen?')) app.angebotLoeschen(a.id);
                                             }}
@@ -99,7 +100,7 @@ function AngebotFormular({ alt, daten, onSpeichern, onAbbrechen }: FormularProps
     }
 
     return (
-        <form className="formular" onSubmit={absenden}>
+        <form className="formular karte" onSubmit={absenden}>
             <h2>{alt ? 'Angebot bearbeiten' : 'Neues Angebot'}</h2>
             <div className="felder">
                 <Feld label="Art">

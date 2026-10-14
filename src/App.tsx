@@ -18,11 +18,26 @@ export default function App() {
     const app = useAppDaten();
     const [seite, setSeite] = useState<Seite>('vergleich');
 
+    const anzahl: Record<Seite, number | undefined> = {
+        vergleich: undefined,
+        angebote: app.daten.angebote.length,
+        tarife: app.daten.tarife.length,
+        geraete: app.daten.geraete.length,
+    };
+
     return (
         <>
-            <header>
-                <h1>Handytarif-Vergleich</h1>
-                <nav>
+            <header className="kopfzeile">
+                <div className="logo">
+                    <span className="logo-zeichen" aria-hidden="true">
+                        €
+                    </span>
+                    <div>
+                        <h1>Handytarif-Vergleich</h1>
+                        <p className="unterzeile">Tarife und Handys über die ganze Laufzeit vergleichen</p>
+                    </div>
+                </div>
+                <nav className="reiter">
                     {(Object.keys(SEITEN) as Seite[]).map((s) => (
                         <button
                             key={s}
@@ -31,17 +46,20 @@ export default function App() {
                             onClick={() => setSeite(s)}
                         >
                             {SEITEN[s]}
+                            {anzahl[s] !== undefined && <span className="zaehler">{anzahl[s]}</span>}
                         </button>
                     ))}
                 </nav>
             </header>
+            <p className="hinweisbox warnbox">
+                Daten werden noch nicht gespeichert – beim Neuladen der Seite ist alles weg.
+            </p>
             <main>
                 {seite === 'vergleich' && <VergleichSeite app={app} />}
                 {seite === 'angebote' && <AngeboteSeite app={app} />}
                 {seite === 'tarife' && <TarifeSeite app={app} />}
                 {seite === 'geraete' && <GeraeteSeite app={app} />}
             </main>
-            <footer>Daten werden noch nicht gespeichert – beim Neuladen ist alles weg.</footer>
         </>
     );
 }
